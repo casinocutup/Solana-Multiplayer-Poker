@@ -1,0 +1,803 @@
+{
+  "version": "0.1.0",
+  "name": "multiplayer_poker",
+  "instructions": [
+    {
+      "name": "createTable",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "creator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tableId",
+          "type": "u64"
+        },
+        {
+          "name": "smallBlind",
+          "type": "u64"
+        },
+        {
+          "name": "bigBlind",
+          "type": "u64"
+        },
+        {
+          "name": "maxPlayers",
+          "type": "u8"
+        },
+        {
+          "name": "buyIn",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "joinTable",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "seat",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "leaveTable",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "startGame",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "action",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "player",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "actionType",
+          "type": {
+            "defined": "ActionType"
+          }
+        },
+        {
+          "name": "amount",
+          "type": {
+            "option": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "showdown",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "distributePot",
+      "accounts": [
+        {
+          "name": "table",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Table",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "tableId",
+            "type": "u64"
+          },
+          {
+            "name": "smallBlind",
+            "type": "u64"
+          },
+          {
+            "name": "bigBlind",
+            "type": "u64"
+          },
+          {
+            "name": "maxPlayers",
+            "type": "u8"
+          },
+          {
+            "name": "buyIn",
+            "type": "u64"
+          },
+          {
+            "name": "gameState",
+            "type": {
+              "defined": "GameState"
+            }
+          },
+          {
+            "name": "dealerPosition",
+            "type": "u8"
+          },
+          {
+            "name": "smallBlindPosition",
+            "type": "u8"
+          },
+          {
+            "name": "bigBlindPosition",
+            "type": "u8"
+          },
+          {
+            "name": "currentPlayer",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "pot",
+            "type": "u64"
+          },
+          {
+            "name": "communityCards",
+            "type": {
+              "array": [
+                {
+                  "option": {
+                    "defined": "Card"
+                  }
+                },
+                5
+              ]
+            }
+          },
+          {
+            "name": "round",
+            "type": {
+              "defined": "Round"
+            }
+          },
+          {
+            "name": "lastRaiseAmount",
+            "type": "u64"
+          },
+          {
+            "name": "minRaise",
+            "type": "u64"
+          },
+          {
+            "name": "players",
+            "type": {
+              "array": [
+                {
+                  "option": {
+                    "defined": "Player"
+                  }
+                },
+                9
+              ]
+            }
+          },
+          {
+            "name": "playerCount",
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
+            "name": "lastActionAt",
+            "type": "i64"
+          },
+          {
+            "name": "actionTimeout",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Player",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "seat",
+            "type": "u8"
+          },
+          {
+            "name": "stack",
+            "type": "u64"
+          },
+          {
+            "name": "bet",
+            "type": "u64"
+          },
+          {
+            "name": "holeCards",
+            "type": {
+              "array": [
+                {
+                  "option": {
+                    "defined": "Card"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "holeCardsCommitted",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "isAllIn",
+            "type": "bool"
+          },
+          {
+            "name": "hasFolded",
+            "type": "bool"
+          },
+          {
+            "name": "hasActed",
+            "type": "bool"
+          },
+          {
+            "name": "lastAction",
+            "type": {
+              "option": {
+                "defined": "ActionType"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Card",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "suit",
+            "type": {
+              "defined": "Suit"
+            }
+          },
+          {
+            "name": "rank",
+            "type": {
+              "defined": "Rank"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Suit",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Clubs"
+          },
+          {
+            "name": "Diamonds"
+          },
+          {
+            "name": "Hearts"
+          },
+          {
+            "name": "Spades"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Rank",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Two"
+          },
+          {
+            "name": "Three"
+          },
+          {
+            "name": "Four"
+          },
+          {
+            "name": "Five"
+          },
+          {
+            "name": "Six"
+          },
+          {
+            "name": "Seven"
+          },
+          {
+            "name": "Eight"
+          },
+          {
+            "name": "Nine"
+          },
+          {
+            "name": "Ten"
+          },
+          {
+            "name": "Jack"
+          },
+          {
+            "name": "Queen"
+          },
+          {
+            "name": "King"
+          },
+          {
+            "name": "Ace"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Waiting"
+          },
+          {
+            "name": "Starting"
+          },
+          {
+            "name": "PreFlop"
+          },
+          {
+            "name": "Flop"
+          },
+          {
+            "name": "Turn"
+          },
+          {
+            "name": "River"
+          },
+          {
+            "name": "Showdown"
+          },
+          {
+            "name": "Finished"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Round",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "PreFlop"
+          },
+          {
+            "name": "Flop"
+          },
+          {
+            "name": "Turn"
+          },
+          {
+            "name": "River"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ActionType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Fold"
+          },
+          {
+            "name": "Check"
+          },
+          {
+            "name": "Call"
+          },
+          {
+            "name": "Raise"
+          },
+          {
+            "name": "AllIn"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "PlayerJoinedEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "player",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seat",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "stack",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "GameStartedEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "dealerPosition",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "smallBlindPosition",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "bigBlindPosition",
+          "type": "u8",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ActionTakenEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "player",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seat",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "actionType",
+          "type": {
+            "defined": "ActionType"
+          },
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "newPot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "round",
+          "type": {
+            "defined": "Round"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RoundEndedEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "round",
+          "type": {
+            "defined": "Round"
+          },
+          "index": false
+        },
+        {
+          "name": "communityCards",
+          "type": {
+            "array": [
+              {
+                "option": {
+                  "defined": "Card"
+                }
+              },
+              5
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PotDistributedEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "winners",
+          "type": {
+            "vec": "publicKey"
+          },
+          "index": false
+        },
+        {
+          "name": "amounts",
+          "type": {
+            "vec": "u64"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CardRevealedEvent",
+      "fields": [
+        {
+          "name": "tableId",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "player",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "seat",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "cards",
+          "type": {
+            "array": [
+              {
+                "defined": "Card"
+              },
+              2
+            ]
+          },
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "TableFull",
+      "msg": "Table is full"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidSeat",
+      "msg": "Invalid seat number"
+    },
+    {
+      "code": 6002,
+      "name": "SeatOccupied",
+      "msg": "Seat already occupied"
+    },
+    {
+      "code": 6003,
+      "name": "NotEnoughPlayers",
+      "msg": "Not enough players to start game"
+    },
+    {
+      "code": 6004,
+      "name": "GameInProgress",
+      "msg": "Game already in progress"
+    },
+    {
+      "code": 6005,
+      "name": "GameNotStarted",
+      "msg": "Game not started"
+    },
+    {
+      "code": 6006,
+      "name": "NotPlayersTurn",
+      "msg": "Not player's turn"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyActed",
+      "msg": "Player has already acted this round"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidAction",
+      "msg": "Invalid action"
+    },
+    {
+      "code": 6009,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6010,
+      "name": "RaiseTooSmall",
+      "msg": "Raise amount too small"
+    },
+    {
+      "code": 6011,
+      "name": "PlayerNotFound",
+      "msg": "Player not found at table"
+    },
+    {
+      "code": 6012,
+      "name": "PlayerAllIn",
+      "msg": "Player is all-in"
+    },
+    {
+      "code": 6013,
+      "name": "PlayerFolded",
+      "msg": "Player has folded"
+    },
+    {
+      "code": 6014,
+      "name": "CannotLeaveDuringGame",
+      "msg": "Cannot leave during active game"
+    },
+    {
+      "code": 6015,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6016,
+      "name": "ActionTimeout",
+      "msg": "Action timeout"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidGameState",
+      "msg": "Invalid game state"
+    },
+    {
+      "code": 6018,
+      "name": "ShowdownRequired",
+      "msg": "Showdown required"
+    }
+  ],
+  "metadata": {
+    "address": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+  }
+}
