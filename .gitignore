@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+target/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+*.so
+.DS_Store
+
+# IDL
+target/idl/
+target/types/
+
+# Anchor
+.anchor/
+test-ledger/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

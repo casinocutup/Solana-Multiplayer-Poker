@@ -1,0 +1,19 @@
+{
+  "name": "solana-multiplayer-poker",
+  "version": "1.0.0",
+  "description": "Real-time multiplayer Texas Hold'em poker on Solana",
+  "scripts": {
+    "test": "anchor test"
+  },
+  "keywords": [
+    "solana",
+    "anchor",
+    "multiplayer-poker",
+    "real-time",
+    "texas-holdem",
+    "web3-gaming",
+    "casino",
+    "wallet-adapter"
+  ],
+  "license": "MIT"
+}
